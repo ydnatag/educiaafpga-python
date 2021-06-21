@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+  <head>
+	<meta name="generator" content="Hugo 0.83.1" />
+    <meta charset="utf-8">
+<title>reveal-hugo</title>
+<meta name="description" content="A Hugo theme for creating Reveal.js presentations">
+<meta name="author" content="Andres Demski">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="/educiaafpga-python/reveal-js/css/reset.css">
+<link rel="stylesheet" href="/educiaafpga-python/reveal-js/css/reveal.css"><link rel="stylesheet" href="/educiaafpga-python/reveal-hugo/themes/robot-lung.css" id="theme"><link rel="stylesheet" href="/educiaafpga-python/highlight-js/color-brewer.min.css">
+    
+
+<style>
+ 
+.reveal section pre {
+  box-shadow: none;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  border: 1px solid lightgrey;
+}
+.reveal section pre:hover {
+  border: 1px solid grey;
+  transition: border 0.3s ease;
+}
+.reveal section pre > code {
+  padding: 10px;
+}
+.reveal table {
+  font-size: 0.65em;
+}
+ 
+.reveal section.side-by-side h1 {
+  position: absolute;
+}
+.reveal section.side-by-side h1:first-of-type {
+  left: 25%;
+}
+.reveal section.side-by-side h1:nth-of-type(2) {
+  right: 25%;
+}
+.reveal section[data-background-image] a,
+.reveal section[data-background-image] p,
+.reveal section[data-background-image] h2 {
+  color: white;
+}
+.reveal section[data-background-image] a {
+  text-decoration: underline;
+}
+</style>
+
+  </head>
+  <body>
+    
+    <div class="reveal">
+      <div class="slides">
+  
+
+    <section><figure><img src="http://www.trece.com.py/uploads/swp/gfftv8/media/5ee7dd8ea97ed87e3df8bc9f.jpeg" width="20%"/>
+</figure>
+
+<h1 id="un-mundo-mejor">Un mundo mejor</h1>
+<h3 id="programando-fpgas-en-python">Programando FPGAs en PYTHON</h3>
+<p>Andrés Demski</p>
+</section><section>
+<h2 id="temario">Temario</h2>
+<ul>
+<li>Motivación</li>
+<li>Diseño: nMigen</li>
+<li>Simulación: cocotb</li>
+<li>Buildeo: nMigen</li>
+<li>Bonus: Riscv + nMigen + ciaa fpga</li>
+</ul>
+</section><section>
+<h2 id="motivación-por-qué-python">Motivación: Por qué Python?</h2>
+<ul>
+<li>Verilog y VHDL 💩</li>
+<li>HDL con OOP</li>
+<li>Velocidad de desarrollo</li>
+<li>Comunidad</li>
+<li>Testeo</li>
+<li>Acercar SW y HDL</li>
+<li>Package manager</li>
+<li>Mantenibilidad</li>
+</ul>
+</section><section>
+
+
+<section data-shortcode-section>
+<h2 id="hdl-flow">HDL Flow</h2>
+<figure><img src="./flow.svg" width="85%"/>
+</figure>
+</section><section>
+<h2 id="newhdls">newHDLs</h2>
+<p>SystemC, VisualHDL, concat, CλaSH, pipelineDSL, Bluespec, jhdl PSHDL reqack,
+hdl-js, shdl, Julia-Verilog, HWT, garnet, magma, migen, MyHDL, <strong>nMigen</strong>,
+Pyrope, PyRTL, PyMTL, veriloggen, RHDL hoodlum, kaze, chisel, SpinalHDL,
+Quokka,</p>
+<small>
+</small>
+<p><a href="https://github.com/drom/awesome-hdl">https://github.com/drom/awesome-hdl</a></p>
+</section><section>
+<h2 id="nmigen">nMigen</h2>
+<ul>
+<li>Creador: <a href="https://github.com/whitequark">@whitequark</a></li>
+<li>Primer release: Octubre 2019</li>
+<li>Ultimo release: Febrero 2020</li>
+<li>Repositorio: <a href="https://github.com/nmigen/nmigen/">https://github.com/nmigen/nmigen/</a></li>
+<li>Documentación: <a href="https://nmigen.info/nmigen/latest/">https://nmigen.info/nmigen/latest/</a></li>
+</ul>
+</section><section>
+<h2 id="que-es-nmigen">Que es nMigen?</h2>
+<ul>
+<li>Herramienta de diseño</li>
+<li>Herramienta de simulación</li>
+<li>Herramienta de buildeo</li>
+</ul>
+</section><section>
+<h1 id="nmigen-flow">nMigen flow</h1>
+<figure><img src="./nmigen_flow.svg" width="60%"/>
+</figure>
+</section><section>
+<h1 id="sintaxis">Sintaxis</h1>
+</section><section>
+<h2 id="elaboratable">Elaboratable</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">nmigen</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#ce5c00;font-weight:bold">*</span>
+
+<span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">TheCore</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">Elaboratable</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">__init__</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">domain</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#39;sync&#39;</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">insert</span> <span style="color:#000">your</span> <span style="color:#000">code</span> <span style="color:#000">here</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+        <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">domain</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">domain</span>
+
+    <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">elaborate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#000">m</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Module</span><span style="color:#000;font-weight:bold">()</span>
+        <span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">insert</span> <span style="color:#000">your</span> <span style="color:#000">code</span> <span style="color:#000">here</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">m</span>
+</code></pre></div></section><section>
+<h2 id="asignaciones">Asignaciones</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">nmigen</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#ce5c00;font-weight:bold">*</span>
+
+<span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">TheCore</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">Elaboratable</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">__init__</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Signal</span><span style="color:#000;font-weight:bold">()</span>
+        <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">q</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Signal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">reset</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">w</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Signal</span><span style="color:#000;font-weight:bold">()</span>
+
+    <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">elaborate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#000">m</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Module</span><span style="color:#000;font-weight:bold">()</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">sync</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">q</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">eq</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#8f5902;font-style:italic"># sincronica</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">comb</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">w</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">es</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#8f5902;font-style:italic"># combinacional</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">m</span>
+</code></pre></div></section><section>
+<h2 id="operaciones">Operaciones</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#8f5902;font-style:italic"># Signals</span>
+<span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Signal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">8</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Signal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">unsigned</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">8</span><span style="color:#000;font-weight:bold">))</span>
+<span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Signal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">signed</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">8</span><span style="color:#000;font-weight:bold">))</span>
+<span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Signal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">...</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">reset</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#000">reset_value</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000">b</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Signal</span><span style="color:#000;font-weight:bold">()</span>
+
+<span style="color:#8f5902;font-style:italic"># Logicas</span>
+<span style="color:#ce5c00;font-weight:bold">~</span><span style="color:#000">a</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">&amp;</span> <span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">|</span> <span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">^</span> <span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">&gt;&gt;</span> <span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">&lt;&lt;</span> <span style="color:#000">b</span>
+<span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">rotate_right</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">i</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">rotate_left</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">i</span><span style="color:#000;font-weight:bold">),</span> 
+<span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">all</span><span style="color:#000;font-weight:bold">(),</span> <span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">any</span><span style="color:#000;font-weight:bold">(),</span> <span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">xor</span><span style="color:#000;font-weight:bold">(),</span> <span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">bool</span><span style="color:#000;font-weight:bold">()</span>
+
+<span style="color:#8f5902;font-style:italic"># Aritmeticas</span>
+<span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">-</span> <span style="color:#000">b</span>
+<span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">as_signed</span><span style="color:#000;font-weight:bold">(),</span> <span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">as_unsigned</span><span style="color:#000;font-weight:bold">()</span>
+
+<span style="color:#8f5902;font-style:italic"># Bits</span>
+<span style="color:#204a87">len</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">a</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#000">a</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">i</span><span style="color:#000;font-weight:bold">:</span><span style="color:#000">j</span><span style="color:#000;font-weight:bold">:</span><span style="color:#000">k</span><span style="color:#000;font-weight:bold">],</span> <span style="color:#204a87">iter</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">a</span><span style="color:#000;font-weight:bold">),</span>
+<span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">bit_select</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">width</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">word_select</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">width</span><span style="color:#000;font-weight:bold">),</span>
+<span style="color:#000">Cat</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">a</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">b</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#000">Repl</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">a</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">n</span><span style="color:#000;font-weight:bold">)</span>
+
+<span style="color:#8f5902;font-style:italic"># Comparación</span>
+<span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">&lt;</span> <span style="color:#000">b</span> <span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">&gt;=</span><span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">!=</span> <span style="color:#000">b</span>
+</code></pre></div></section><section>
+<h2 id="if">If</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">elaborate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">m</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Module</span><span style="color:#000;font-weight:bold">()</span>
+
+    <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">If</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">condition</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">comb</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#ce5c00;font-weight:bold">...</span> <span style="color:#000;font-weight:bold">]</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">sync</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#ce5c00;font-weight:bold">...</span> <span style="color:#000;font-weight:bold">]</span>
+
+        <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">If</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">other</span><span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#000">condition</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#000;font-weight:bold">)</span>
+            <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">comb</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#ce5c00;font-weight:bold">...</span> <span style="color:#000;font-weight:bold">]</span>
+            <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">sync</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#ce5c00;font-weight:bold">...</span> <span style="color:#000;font-weight:bold">]</span>
+
+    <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">Elif</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">other</span><span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#000">other</span><span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#000">condition</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">comb</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#ce5c00;font-weight:bold">...</span> <span style="color:#000;font-weight:bold">]</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">sync</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#ce5c00;font-weight:bold">...</span> <span style="color:#000;font-weight:bold">]</span>
+
+    <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">Else</span><span style="color:#000;font-weight:bold">():</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">comb</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#ce5c00;font-weight:bold">...</span> <span style="color:#000;font-weight:bold">]</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">sync</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#ce5c00;font-weight:bold">...</span> <span style="color:#000;font-weight:bold">]</span>
+    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">m</span>
+</code></pre></div></section><section>
+<h2 id="switch-case">Switch-Case</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">elaborate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">m</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Module</span><span style="color:#000;font-weight:bold">()</span>
+    <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">Switch</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">signal</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">Case</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">case</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#000;font-weight:bold">):</span>
+            <span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">insert</span> <span style="color:#000">code</span> <span style="color:#000">here</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+
+        <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">i</span> <span style="color:#204a87;font-weight:bold">in</span> <span style="color:#204a87">range</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">10</span><span style="color:#000;font-weight:bold">):</span>
+            <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">Case</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">i</span><span style="color:#000;font-weight:bold">):</span>
+                <span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">insert</span> <span style="color:#000">code</span> <span style="color:#000">here</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+
+        <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">Default</span><span style="color:#000;font-weight:bold">():</span>
+            <span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">insert</span> <span style="color:#000">code</span> <span style="color:#000">here</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">m</span>
+</code></pre></div></section><section>
+<h2 id="fsm">FSM</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">elaborate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">m</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Module</span><span style="color:#000;font-weight:bold">()</span>
+
+    <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">FSM</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">domain</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">domain</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">as</span> <span style="color:#000">fsm</span><span style="color:#000;font-weight:bold">:</span>
+        <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">State</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;IDLE&#39;</span><span style="color:#000;font-weight:bold">):</span>
+            <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">If</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">condition</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#000;font-weight:bold">):</span>
+                <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">next</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#39;RUN&#39;</span>
+
+        <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">State</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;RUN&#39;</span><span style="color:#000;font-weight:bold">):</span>
+            <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">If</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">other</span><span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#000">condition</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#000;font-weight:bold">):</span>
+                <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">sync</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#ce5c00;font-weight:bold">...</span> <span style="color:#000;font-weight:bold">]</span>
+                <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">comb</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#ce5c00;font-weight:bold">...</span> <span style="color:#000;font-weight:bold">]</span>
+    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">m</span>
+</code></pre></div></section><section>
+<h2 id="records">Records</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape>
+<span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">TheCore</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">Elaboratable</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">__init__</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">n</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">stream</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Record</span><span style="color:#000;font-weight:bold">([(</span><span style="color:#4e9a06">&#39;data&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">n</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;valid&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;ready&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)])</span>
+    
+    <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">elaborate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#000">m</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Module</span><span style="color:#000;font-weight:bold">()</span>
+        <span style="color:#000">cnt</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Signal</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">like</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">stream</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">data</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">comb</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">stream</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">valid</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">eq</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">If</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">stream</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">valid</span> <span style="color:#ce5c00;font-weight:bold">&amp;</span> <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">stream</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">ready</span><span style="color:#000;font-weight:bold">):</span>
+            <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">sync</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">stream</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">data</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">eq</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">stream</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">data</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#0000cf;font-weight:bold">1</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">m</span>
+</code></pre></div></section><section>
+<h2 id="submodules">Submodules</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">TheCore</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">Elaboratable</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#ce5c00;font-weight:bold">...</span>
+<span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">elaborate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">m</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Module</span><span style="color:#000;font-weight:bold">()</span>
+    <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">submodules</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">other</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">other</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">OtherCore</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">argument</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">comb</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span>
+        <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">o</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">eq</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">other</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">o</span><span style="color:#000;font-weight:bold">),</span>
+        <span style="color:#000">other</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">i</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">eq</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">i</span><span style="color:#000;font-weight:bold">),</span>
+    <span style="color:#000;font-weight:bold">]</span>
+    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">m</span>
+</code></pre></div></section><section>
+<h2 id="instance">Instance</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">elaborate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">m</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Module</span><span style="color:#000;font-weight:bold">()</span>
+    <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">submodules</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">other</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Instance</span><span style="color:#000;font-weight:bold">(</span>
+        <span style="color:#4e9a06">&#39;non_nmigen_core&#39;</span><span style="color:#000;font-weight:bold">,</span>
+        <span style="color:#000">a_ATTRIBUTE</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;TRUE&#34;</span><span style="color:#000;font-weight:bold">,</span>
+        <span style="color:#000">p_PARAMETER</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#0000cf;font-weight:bold">5</span><span style="color:#000;font-weight:bold">,</span>
+        <span style="color:#000">o_OUTPUT_SIGNAL</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">a</span><span style="color:#000;font-weight:bold">,</span>
+        <span style="color:#000">i_INPUT_SIGNAL</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">b</span><span style="color:#000;font-weight:bold">,</span>
+        <span style="color:#000">io_INOUT_SIGNAL</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#3465a4">self</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">c</span><span style="color:#000;font-weight:bold">,</span>
+    <span style="color:#000;font-weight:bold">)</span>
+
+    <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#204a87">open</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;path/to/verilog/file.v&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#39;r&#39;</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">as</span> <span style="color:#000">f</span><span style="color:#000;font-weight:bold">:</span>
+        <span style="color:#000">platform</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">add_file</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;file.v&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">f</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">read</span><span style="color:#000;font-weight:bold">())</span>
+    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">m</span>
+</code></pre></div></section><section>
+<figure><img src="https://www.unilad.co.uk/cdn-cgi/image/width=648,quality=70,format=jpeg,fit=pad,dpr=1/https%3A%2F%2Fwww.unilad.co.uk%2Fwp-content%2Fuploads%2F2020%2F12%2F122091216_194906708666485_1155858819270838587_o.jpg" width="40%"/>
+</figure>
+<h1 id="ejemplos">Ejemplos!!!</h1>
+
+</section>
+</section><section>
+
+
+<section data-shortcode-section>
+<h1 id="simulación">Simulación</h1>
+</section><section>
+<h2 id="cocotb">Cocotb</h2>
+<ul>
+<li>Primer release: Julio 2013</li>
+<li>Ultimo release: Mayo 2021</li>
+<li>Repositorio: <a href="https://github.com/cocotb/cocotb/">https://github.com/cocotb/cocotb/</a></li>
+<li>Documentación: <a href="https://docs.cocotb.org">https://docs.cocotb.org</a></li>
+</ul>
+</section><section>
+<h2 id="qué-es-cocotb">Qué es COCOTB?</h2>
+<figure><img src="https://docs.cocotb.org/en/stable/_images/cocotb_overview.svg" width="85%"/>
+</figure>
+</section><section>
+<h2 id="test">Test</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">cocotb</span>
+<span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">cocotb.triggers</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">Timer</span>
+
+<span style="color:#5c35cc;font-weight:bold">@cocotb.test</span><span style="color:#000;font-weight:bold">()</span>
+<span style="color:#000">async</span> <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">the_test</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">await</span> <span style="color:#000">Timer</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">10</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#39;ns&#39;</span><span style="color:#000;font-weight:bold">)</span>
+
+<span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">test_the_core</span><span style="color:#000;font-weight:bold">():</span>
+    <span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">nmigen_cocotb</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">run</span> <span style="color:#204a87;font-weight:bold">as</span> <span style="color:#000">run_test</span>
+    <span style="color:#000">core</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">TheCore</span><span style="color:#000;font-weight:bold">()</span>
+    <span style="color:#000">platform</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#3465a4">None</span>
+    <span style="color:#000">ports</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">[</span><span style="color:#000">core</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">a</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">core</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">b</span><span style="color:#000;font-weight:bold">]</span>
+    <span style="color:#000">run_test</span><span style="color:#000;font-weight:bold">(</span>
+        <span style="color:#000">core</span><span style="color:#000;font-weight:bold">,</span>
+        <span style="color:#4e9a06">&#39;python.path.to.this.module&#39;</span><span style="color:#000;font-weight:bold">,</span>
+        <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">,</span>
+        <span style="color:#000">ports</span><span style="color:#000;font-weight:bold">,</span>
+        <span style="color:#000">vcd_file</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#39;./the_core.vcd&#39;</span>
+    <span style="color:#000;font-weight:bold">)</span>
+
+<span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">__name__</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#39;__main__&#39;</span><span style="color:#000;font-weight:bold">:</span>
+    <span style="color:#000">test_the_core</span><span style="color:#000;font-weight:bold">()</span>
+</code></pre></div></section><section>
+<h2 id="acceder-a-señales">Acceder a señales</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#5c35cc;font-weight:bold">@cocotb.test</span><span style="color:#000;font-weight:bold">()</span>
+<span style="color:#000">async</span> <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">the_test</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">signal_a</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">a</span>
+    <span style="color:#000">value_a</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">value</span>
+    <span style="color:#000">value_a</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">value</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">integer</span>
+    <span style="color:#000">value_a</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">value</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">signed_integer</span>
+    <span style="color:#000">value_a</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">a</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">value</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">binstr</span>
+
+    <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#0000cf;font-weight:bold">5</span>
+    <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#0000cf;font-weight:bold">5</span>
+</code></pre></div></section><section>
+<h2 id="triggers">Triggers</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#000">await</span> <span style="color:#000">Timer</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">time</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">units</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000">await</span> <span style="color:#000">RisingEdge</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">signal</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000">await</span> <span style="color:#000">FallingEdge</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">signal</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000">await</span> <span style="color:#000">First</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">*</span><span style="color:#000">triggers</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000">await</span> <span style="color:#000">Combine</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">*</span><span style="color:#000">triggers</span><span style="color:#000;font-weight:bold">)</span>
+</code></pre></div></section><section>
+<h2 id="coroutines">Coroutines</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#000">async</span> <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">reset</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">rst</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#0000cf;font-weight:bold">1</span>
+    <span style="color:#000">await</span> <span style="color:#000">Timer</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">100</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#39;ns&#39;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">rst</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#0000cf;font-weight:bold">0</span>
+    <span style="color:#000">await</span> <span style="color:#000">Timer</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">100</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#39;ns&#39;</span><span style="color:#000;font-weight:bold">)</span>
+
+<span style="color:#000">await</span> <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">set_value</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">value</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">a</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#000">value</span>
+    <span style="color:#000">await</span> <span style="color:#000">Timer</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">10</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#39;ns&#39;</span><span style="color:#000;font-weight:bold">)</span>
+
+<span style="color:#000">await</span> <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">read_value</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">await</span> <span style="color:#000">Timer</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">10</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#39;ns&#39;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">b</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">value</span>
+
+<span style="color:#5c35cc;font-weight:bold">@cocotb.test</span><span style="color:#000;font-weight:bold">()</span>
+<span style="color:#000">async</span> <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">the_test</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">await</span> <span style="color:#000">reset</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000">await</span> <span style="color:#000">set_value</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">5</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000">value</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">await</span> <span style="color:#000">read_value</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#204a87;font-weight:bold">assert</span> <span style="color:#000">value</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#0000cf;font-weight:bold">10</span>
+</code></pre></div></section><section>
+<h2 id="fork">Fork</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">cocotb</span>
+<span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">cocotb.triggers</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">Timer</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">RisingEdge</span>
+<span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">cocotb.clock</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">Clock</span>
+
+<span style="color:#000">async</span> <span style="color:#000">reset</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">rst</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#0000cf;font-weight:bold">1</span>
+    <span style="color:#000">await</span> <span style="color:#000">RisingEdge</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">clk</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000">await</span> <span style="color:#000">RisingEdge</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">clk</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">rst</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#0000cf;font-weight:bold">0</span>
+    <span style="color:#000">await</span> <span style="color:#000">RisingEdge</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">clk</span><span style="color:#000;font-weight:bold">)</span>
+
+<span style="color:#000">async</span> <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">the_test</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">cocotb</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">fork</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">Clock</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">clk</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">10</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#39;ns&#39;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">start</span><span style="color:#000;font-weight:bold">())</span> <span style="color:#8f5902;font-style:italic"># Clock generator</span>
+    <span style="color:#000">cocotb</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">fork</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">reset</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">))</span>
+    <span style="color:#000">await</span> <span style="color:#000">reset</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">_</span> <span style="color:#204a87;font-weight:bold">in</span> <span style="color:#204a87">range</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">100</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#000">await</span> <span style="color:#000">RisingEdge</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">dut</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">clk</span><span style="color:#000;font-weight:bold">)</span>
+</code></pre></div></section><section>
+<figure><img src="https://i2.wp.com/allhtaccess.info/wp-content/uploads/2018/03/programming.gif?fit=1281%2C716&amp;ssl=1" width="85%"/>
+</figure>
+<h2 id="mas-ejemplos">MAS EJEMPLOS!!</h2>
+
+</section>
+</section><section>
+
+
+<section data-shortcode-section>
+<h1 id="nmigen-build">nMigen build</h1>
+</section><section>
+<h1 id="platform">Platform</h1>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">nmigen.vendor.lattice_ice40</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#ce5c00;font-weight:bold">*</span>
+<span style="color:#204a87;font-weight:bold">from</span> <span style="color:#000">nmigen.build</span> <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#ce5c00;font-weight:bold">*</span>
+
+<span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">EduCiaaFPGA</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">LatticeICE40Platform</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#000">device</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;iCE40HX4K&#34;</span>
+    <span style="color:#000">package</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;TQ144&#34;</span>
+    <span style="color:#000">default_clk</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;clk12&#34;</span>
+    <span style="color:#000">resources</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">[</span>
+        <span style="color:#000">Resource</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;clk12&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">Pins</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;94&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87">dir</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;i&#34;</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#000">Clock</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">12e6</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#000">Attrs</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">GLOBAL</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#3465a4">True</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">IO_STANDARD</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;SB_LVCMOS&#34;</span><span style="color:#000;font-weight:bold">)),</span>
+        <span style="color:#000">Resource</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;uart&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">,</span> 
+            <span style="color:#000">Subsignal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;rx&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">Pins</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;55&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87">dir</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;i&#34;</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#000">Attrs</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">IO_STANDARD</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;SB_LVCMOS&#34;</span><span style="color:#000;font-weight:bold">)),</span>
+            <span style="color:#000">Subsignal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;tx&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">Pins</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;56&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87">dir</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;o&#34;</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#000">Attrs</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">IO_STANDARD</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;SB_LVCMOS&#34;</span><span style="color:#000;font-weight:bold">)),</span>
+        <span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">]</span>
+    <span style="color:#000">connectors</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">[</span> <span style="color:#000">Connector</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;con&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#ce5c00;font-weight:bold">...</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">....</span><span style="color:#000;font-weight:bold">]</span>
+</code></pre></div></section><section>
+<h2 id="plataformas-soportadas">Plataformas soportadas</h2>
+<ul>
+<li>Intel (quartus)</li>
+<li>Lattice ECP5 (yosys + nextpnr y diamond)</li>
+<li>Lattice ICE40 (yosys + nextpnr y icecube2)</li>
+<li>Lattice MachX02-X03 (diamond)</li>
+<li>quicklogic (symbiflow)</li>
+<li>Xilinx 7 series (vivado y symbiflow)</li>
+<li>Xilinx spartan3/6 (ise)</li>
+<li>Xilinx Ultrascale (vivado)</li>
+</ul>
+</section><section>
+<h2 id="placas-soportadas">Placas soportadas</h2>
+<p>fomu_pvt, machxo3_sk, arty_a7, te0714_03_50_2I, ulx3s, de0, arrow_deca,
+mister, ecpix5, microzed_z010, chameleon96, sk_xc6slx9, ecp5_5g_evn, zturn_lite_z010,
+upduino_v1, de1_soc, quickfeather, blackice_ii, microzed_z020, de0_cv, rz_easyfpga_a2_2,
+tinyfpga_ax1, mercury, ice40_hx8k_b_evn, nexys4ddr, kcu105, icebreaker, ice40_up5k_b_evn,
+atlys, upduino_v2, ice40_hx1k_blink_evn, numato_mimas, orangecrab_r0_2, zturn_lite_z007s,
+de10_lite, de10_nano, nandland_go, arty_z7, genesys2, versa_ecp5, kc705, tinyfpga_ax2,
+versa_ecp5_5g, supercon19badge, icebreaker_bitsy, tinyfpga_bx, fomu_hacker, arty_s7,
+blackice, alchitry_au, icestick, orangecrab_r0_1</p>
+</section><section>
+<h2 id="pedir-un-recurso">Pedir un recurso</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">Top</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">Elaboratable</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">__init__</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#ce5c00;font-weight:bold">*</span><span style="color:#000">args</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#ce5c00;font-weight:bold">**</span><span style="color:#000">kwargs</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">insert</span> <span style="color:#000">code</span> <span style="color:#000">here</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+ 
+    <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">elaborate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#000">m</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Module</span><span style="color:#000;font-weight:bold">()</span>
+        <span style="color:#000">led</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">platform</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">request</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;led&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">sync</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000">led</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">eq</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">~</span><span style="color:#000">led</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">m</span>
+    
+</code></pre></div></section><section>
+<h2 id="crear-un-dominio-de-clock">Crear un dominio de clock</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">Top</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">Elaboratable</span><span style="color:#000;font-weight:bold">):</span>
+    <span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">elaborate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3465a4">self</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">platform</span><span style="color:#000;font-weight:bold">):</span>
+        <span style="color:#000">m</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Module</span><span style="color:#000;font-weight:bold">()</span>
+        <span style="color:#000">clk</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">platform</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">request</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;clk12&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#000">rst</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">platform</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">request</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;button&#39;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">domains</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000">ClockDomain</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;sync&#39;</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#000">m</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">d</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">comb</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000;font-weight:bold">[</span>
+            <span style="color:#000">ClockSignal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;sync&#39;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">eq</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">clk</span><span style="color:#000;font-weight:bold">),</span>
+            <span style="color:#000">ClockReset</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#39;sync&#39;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">eq</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">rst</span><span style="color:#000;font-weight:bold">),</span>
+        <span style="color:#000;font-weight:bold">]</span>
+        <span style="color:#ce5c00;font-weight:bold">...</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">m</span>
+</code></pre></div></section><section>
+<h2 id="build">Build!</h2>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="nohighlight" data-noescape><span style="color:#000">core</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">TheCore</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">args</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000">plat</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">EduCiaaFPGA</span><span style="color:#000;font-weight:bold">()</span>
+<span style="color:#000">plat</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">build</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">core</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">do_program</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#3465a4">True</span><span style="color:#000;font-weight:bold">)</span>
+</code></pre></div></section><section>
+<figure><img src="https://66.media.tumblr.com/tumblr_m7v0lxN0po1rn95k2o1_500.gif" width="40%"/>
+</figure>
+<h2 id="sii-mas-ejemplos">SII!! MAS EJEMPLOS!!</h2>
+
+</section>
+</section><section>
+<h1 id="preguntas">¿Preguntas?</h1>
+</section><section>
+<h1 id="muchas-gracias">Muchas gracias!</h1>
+<p><a href="mailto:andresdemski@gmail.com">andresdemski@gmail.com</a></p>
+<p><a href="https://github.com/andresdemski">https://github.com/andresdemski</a></p>
+<p><a href="https://www.linkedin.com/in/ademski/">https://www.linkedin.com/in/ademski/</a></p>
+</section>
+
+  
+
+
+</div>
+      
+<div class="line top"></div>
+<div class="line bottom"></div>
+<div class="line left"></div>
+<div class="line right"></div>
+
+    </div>
+<script type="text/javascript" src=/educiaafpga-python/reveal-hugo/object-assign.js></script>
+
+<a href="/educiaafpga-python/reveal-js/css/print/" id="print-location" style="display: none;"></a>
+<script type="text/javascript">
+  var printLocationElement = document.getElementById('print-location');
+  var link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.type = 'text/css';
+  link.href = printLocationElement.href + (window.location.search.match(/print-pdf/gi) ? 'pdf.css' : 'paper.css');
+  document.getElementsByTagName('head')[0].appendChild(link);
+</script>
+
+<script type="application/json" id="reveal-hugo-site-params">{"history":true,"templates":{"grey":{"background":"#424242","transition":"convex"}}}</script>
+<script type="application/json" id="reveal-hugo-page-params">{"custom_theme":"reveal-hugo/themes/robot-lung.css","highlight_theme":"color-brewer","margin":0.2,"templates":{"hotpink":{"background":"#FF4081","class":"hotpink"}},"transition":"slide","transition_speed":"fast"}</script>
+
+<script src="/educiaafpga-python/reveal-js/js/reveal.js"></script>
+
+<script type="text/javascript">
+  
+  
+  function camelize(map) {
+    if (map) {
+      Object.keys(map).forEach(function(k) {
+        newK = k.replace(/(\_\w)/g, function(m) { return m[1].toUpperCase() });
+        if (newK != k) {
+          map[newK] = map[k];
+          delete map[k];
+        }
+      });
+    }
+    return map;
+  }
+  
+  var revealHugoDefaults = { center: true, controls: true, history: true, progress: true, transition: "slide" };
+  var revealHugoSiteParams = JSON.parse(document.getElementById('reveal-hugo-site-params').innerHTML);
+  var revealHugoPageParams = JSON.parse(document.getElementById('reveal-hugo-page-params').innerHTML);
+  
+  var options = Object.assign({},
+    camelize(revealHugoDefaults),
+    camelize(revealHugoSiteParams),
+    camelize(revealHugoPageParams));
+  Reveal.initialize(options);
+</script>
+
+
+  
+  
+  <script type="text/javascript" src="/educiaafpga-python/reveal-js/plugin/markdown/marked.js"></script>
+  
+  <script type="text/javascript" src="/educiaafpga-python/reveal-js/plugin/markdown/markdown.js"></script>
+  
+  <script type="text/javascript" src="/educiaafpga-python/reveal-js/plugin/highlight/highlight.js"></script>
+  
+  <script type="text/javascript" src="/educiaafpga-python/reveal-js/plugin/zoom-js/zoom.js"></script>
+  
+  
+  <script type="text/javascript" src="/educiaafpga-python/reveal-js/plugin/notes/notes.js"></script>
+
+
+
+    
+    
+
+
+<script type="text/javascript">
+
+Reveal.addEventListener('slidechanged', function(event) {
+  console.log("🎞️ Slide is now " + event.indexh);
+});
+</script>
+
+  </body>
+</html>

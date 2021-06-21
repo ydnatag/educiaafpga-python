@@ -1,0 +1,220 @@
++++
+title = "reveal-hugo"
+description = "A Hugo theme for creating Reveal.js presentations"
+outputs = ["Reveal"]
+[reveal_hugo]
+custom_theme = "reveal-hugo/themes/robot-lung.css"
+margin = 0.2
+highlight_theme = "color-brewer"
+transition = "slide"
+transition_speed = "fast"
+[reveal_hugo.templates.hotpink]
+class = "hotpink"
+background = "#FF4081"
++++
+
+{{< figure src="http://www.trece.com.py/uploads/swp/gfftv8/media/5ee7dd8ea97ed87e3df8bc9f.jpeg" width="20%" >}} 
+# Un mundo mejor
+### Programando FPGAs en PYTHON
+
+Andrés Demski
+
+---
+
+## Temario
+
+* Motivación
+* Diseño: nMigen
+* Simulación: cocotb
+* Bonus: Riscv + nMigen + verilator + ciaa fpga
+
+---
+
+## Motivación: Por qué Python?
+
+* Verilog y VHDL :poop:
+* HDL con OOP
+* Velocidad de desarrollo
+* Comunidad
+* Testeo
+* Acercar SW y HDL
+
+---
+
+{{% section %}}
+
+# Diseño
+
+---
+
+## newHDLs
+
+
+SystemC, VisualHDL, concat, CλaSH, pipelineDSL, Bluespec, jhdl PSHDL reqack, 
+hdl-js, shdl, Julia-Verilog, HWT, garnet, magma, migen, MyHDL, **nMigen**, 
+Pyrope, PyRTL, PyMTL, veriloggen, RHDL hoodlum, kaze, chisel, SpinalHDL, 
+Quokka, 
+
+<small>
+</small>
+
+https://github.com/drom/awesome-hdl
+
+---
+
+## nMigen
+
+* Creador: [@whitequark](https://github.com/whitequark)
+* Primer release: Octubre 2019
+* Ultimo release: Febrero 2020
+* Ultimo commit: hace 20 dias
+* Repositorio: https://github.com/nmigen/nmigen/
+* Documentación: https://nmigen.info/nmigen/latest/
+
+---
+
+## Que es nMigen?
+
+* Herramienta de diseño
+* Herramienta de simulación
+* Herrmienta de buildeo
+
+---
+
+## Plataformas soportadas
+
+* Intel (quartus)
+* Lattice ECP5 (yosys + nextpnr y diamond)
+* Lattice ICE40 (yosys + nextpnr y icecube2)
+* Lattice MachX02-X03 (diamond)
+* quicklogic (symbiflow)
+* Xilinx 7 series (vivado y symbiflow)
+* Xilinx spartan3/6 (ise)
+* Xilinx Ultrascale (vivado)
+
+---
+
+# Sintaxis
+
+---
+## Elaboratable
+
+```python
+from nmigen import *
+
+class TheModule(Elaboratable)
+    def __init__(self, domain='sync'):
+        <insert your code here>
+        self.domain = domain
+
+    def elaborate(self, platform):
+        m = Module()
+        <insert your code here>
+        return m
+```
+
+---
+## Flipflop
+
+Verilog
+
+```verilog
+module FlipFlop(input wire clk, input wire rst, input wire d, output reg q);
+    always @(posedge(clk))
+        if (rst == 1'b1) begin
+            q <= 1'b0;
+        end else begin
+            q <= d;
+        end 
+    end
+endmodule
+```
+
+nMigen
+
+```python
+from nmigen import *
+
+class FlipFlop(Elaboratable)
+    def __init__(self):
+        self.d = Signal()
+        self.q = Signal(reset=0)
+
+    def elaborate(self, platform):
+        m = Module()
+        m.d.sync += self.q.eq(self.d)
+        return m
+```
+
+---
+
+## If  - swith
+
+```python
+def elaborate(self, platform):
+    m = Module()
+    with m.If(<condition>):
+        m.d.comb += [ ... ]
+        m.d.sync += [ ... ]
+    with m.Switch(<signal>):
+        with m.Case(<case>):
+            <insert code here>
+        for i in range(10):
+            with m.Case(i):
+                <insert code here>
+        with m.Default():
+            <insert code here>
+    return m
+
+```
+
+---
+
+## FSM
+
+```python
+def elaborate(self, platform):
+    m = Module()
+    with m.FSM(domain=self.domain) as fsm:
+        with m.State('IDLE'):
+            with m.If(<condition>):
+                m.next = 'RUN'
+        with m.State('RUN'):
+            with m.If(<other-condition>):
+                m.d.sync += a.eq(b)
+                m.d.comb += c.eq(d)
+    return m
+```
+
+---
+
+# Example
+
+---
+
+## Adder
+
+```python
+from nmigen import *
+class Adder(Elaboratable):
+    def __init__(self, n, domain='sync'):
+        self.a = Signal(n)
+        self.b = Signal(n)
+        self.r = Signal(n)
+        self.domain = domain
+
+    def elaborate(self, platform):
+        m = Module()
+        domain = m.d[self.domain]
+        domain += self.r.eq(self.a + self.b)
+        return m
+
+if __name__ == 'main':
+    from nmigen.cli import main
+    core = Adder(10, 'sync')
+    main(core, platform=None, ports=[core.a, core.b, core.r])
+```
+
+
+
+{{% /section %}}
