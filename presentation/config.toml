@@ -1,0 +1,30 @@
+baseURL = "https://andresdemski.github.io/educiaafpga-python"
+languageCode = "en-us"
+title = "Un mundo mejor"
+disableKinds = ["sitemap", "RSS"]
+theme = "reveal-hugo"
+enableEmoji=true
+
+
+[author]
+name = "Andres Demski"
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[markup.highlight]
+codeFences = true  # use highlight.js 
+style = "tango"  # set a style for hugo highlighting
+
+[outputFormats.Reveal]
+baseName = "index"
+mediaType = "text/html"
+isHTML = true
+
+[params.reveal_hugo]
+history = true
+
+# used in content/template-example
+[params.reveal_hugo.templates.grey]
+background = "#424242"
+transition = "convex"
