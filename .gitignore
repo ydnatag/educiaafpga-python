@@ -1,0 +1,7 @@
+*.vcd
+*.elf
+*.bin
+*.pyc
+__pycache__
+build
+venv
