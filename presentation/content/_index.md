@@ -19,6 +19,8 @@ background = "#FF4081"
 
 Andrés Demski
 
+https://github.com/andresdemski/educiaafpga-python
+
 ---
 
 ## Temario
@@ -539,7 +541,10 @@ plat.build(core, do_program=True)
 
 # Muchas gracias!
 
+
 andresdemski@gmail.com
+
+https://github.com/andresdemski/educiaafpga-python
 
 https://github.com/andresdemski
 
