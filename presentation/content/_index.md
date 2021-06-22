@@ -102,9 +102,8 @@ https://github.com/drom/awesome-hdl
 from nmigen import *
 
 class TheCore(Elaboratable)
-    def __init__(self, domain='sync'):
+    def __init__(self):
         <insert your code here>
-        self.domain = domain
 
     def elaborate(self, platform):
         m = Module()
@@ -411,8 +410,7 @@ async reset(dut):
 
 async def the_test(dut):
     cocotb.fork(Clock(dut.clk, 10, 'ns').start()) # Clock generator
-    cocotb.fork(reset(dut))
-    await reset(dut)
+    cocotb.fork(reset(dut)) # await reset(dut)
     for _ in range(100):
         await RisingEdge(dut.clk)
 ```
